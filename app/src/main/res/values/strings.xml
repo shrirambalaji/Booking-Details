@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Booking Details</string>
+    <string name="gcm_send_message">Sent </string>
+    <string name="token_error_message">Token sending error</string>
+    <string name="title_activity_recent_booking_history">RecentBookingHistory</string>
+
+</resources>
