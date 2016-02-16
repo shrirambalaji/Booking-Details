@@ -3,17 +3,26 @@ package com.cargo.booking_details;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.gcm.GcmListenerService;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+
 
 public class MyGcmListenerService extends GcmListenerService {
 
@@ -33,10 +42,14 @@ public class MyGcmListenerService extends GcmListenerService {
         Log.d(TAG, "From: " + from);
         Log.d(TAG, "Message: " + message);
 
+
+        Calendar c = Calendar.getInstance();
+        System.out.println("Current time => " + c.getTime());
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String formattedDate = df.format(c.getTime());
+RegisterEntry register = new RegisterEntry();
+register.execute(formattedDate, message);
         SQLiteDatabase sqLiteDatabase = openOrCreateDatabase("HISTORY",MODE_PRIVATE,null);
-        sqLiteDatabase.execSQL("CREATE TABLE IF NOT EXISTS RECENT_BOOKING(BOOKING_DATE DATE,DETAILS BLOB)");
-
-
 
         // [START_EXCLUDE]
         /**
@@ -51,6 +64,7 @@ public class MyGcmListenerService extends GcmListenerService {
          * that a message was received.
          */
         sendNotification(message);
+
         // [END_EXCLUDE]
     }
     // [END receive_message]
@@ -82,5 +96,39 @@ public class MyGcmListenerService extends GcmListenerService {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
+
+    }
+
+    public  class RegisterEntry extends AsyncTask<String,String,String>
+    {
+
+         String COLUMN_NULLABLE = null;
+        // To add empty rows to your database by passing in an empty Content
+        // Values
+        // object, you must use the null column hack parameter to specify the
+        // name of
+        // the column that can be set to null.
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            SqlDbHelper mDbHelper = new SqlDbHelper(getBaseContext());
+            SQLiteDatabase db = mDbHelper.getWritableDatabase();
+            ContentValues values = new ContentValues();
+
+            values.put(SqlDbHelper.DATE,params[0]);
+            values.put(SqlDbHelper.DETAILS, params[1]);
+            long rowId = db.insert(SqlDbHelper.TABLE_NAME,COLUMN_NULLABLE,values);
+            Log.i(TAG,"Inserted");
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Toast.makeText(getApplicationContext(),"Inserted",Toast.LENGTH_SHORT).show();
+            super.onPostExecute(s);
+        }
+
+
     }
 }

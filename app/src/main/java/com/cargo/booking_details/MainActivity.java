@@ -191,6 +191,9 @@ public class MainActivity extends AppCompatActivity {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
             Toast.makeText(getApplicationContext(),"Registered Successfully", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(getApplicationContext(),RecentBookingHistory.class);
+            startActivity(intent);
         }
     }
     @Override
